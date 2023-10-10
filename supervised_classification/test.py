@@ -4,6 +4,10 @@ Author: Olga TARAN, University of Geneva, 2021
 '''
 
 from __future__ import print_function
+
+import os
+os.chdir('./supervised_classification')
+
 import argparse
 import datetime
 import yaml
@@ -47,7 +51,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # ======================================================================================================================
 def run():
-    config = yaml_utils.Config(yaml.load(open(args.config_path)))
+    config = yaml_utils.Config(yaml.load(open(args.config_path), Loader=yaml.FullLoader))
 
     args.checkpoint_dir = "%s_supervised_classifier_n_%d" % (args.image_type, args.n_classes)
     args.dir = "supervised_classifier_lr%s" % args.lr
@@ -59,6 +63,7 @@ def run():
     Classifier.load_weights("%s/Classifier_epoch_%d" % (model.checkpoint_dir, args.epoch))
 
     log.info("Data loading.....")
+    args.seed = 5
     DataGen = ClassifierDataLoader(config, args, type="test", is_debug_mode=args.is_debug)
     DataGen.initDataSet()
     n_batches = DataGen.n_batches
@@ -88,6 +93,13 @@ def run():
 
         true_lab = np.argmax(labels)
         pred_lab = np.argmax(prediction)
+        
+        print("x_batch:", len(x_batch))
+        print("labels: ", labels)
+        print("prediction: ", prediction)
+        
+        print("true_lab:", true_lab)
+        print("pred_lab:", pred_lab)
 
         # --------------------------------------------
         # 2 classes: original, fakes
@@ -139,52 +151,3 @@ def run():
 # ======================================================================================================================
 if __name__ == "__main__":
     run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

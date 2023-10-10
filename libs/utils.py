@@ -138,5 +138,3 @@ def saveSpeed(epoch):
         save_each = 100
 
     return save_each
-
-

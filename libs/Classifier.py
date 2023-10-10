@@ -58,4 +58,3 @@ class Classifier():
         patch_out = Softmax()(d)
 
         return Model(inputs=[inputs], outputs=[patch_out],  name="Classifier")
-

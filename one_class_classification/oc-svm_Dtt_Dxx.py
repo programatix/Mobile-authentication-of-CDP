@@ -5,6 +5,10 @@ Author: Olga TARAN, University of Geneva, 2021
 '''
 
 from __future__ import print_function
+
+import os
+os.chdir('./one_class_classification')
+
 import argparse
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler

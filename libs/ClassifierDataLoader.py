@@ -8,7 +8,7 @@ from skimage.exposure import adjust_gamma
 from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from libs.to_public.BaseClass import BaseClass
+from libs.BaseClass import BaseClass
 
 # ======================================================================================================================
 
@@ -51,6 +51,52 @@ class ClassifierDataLoader(BaseClass):
             self.n_batches = self.__data.shape[0]
             self.datagen = datagen.flow(x=self.__data, y=self.__labels, batch_size=1, shuffle=False)
 
+    def loadDataStageInit(self):
+        list = os.listdir(self.__binary_codes_path)
+        list.sort()
+
+        args = self.config.dataset['args']
+        if self.__seed >= 0:
+            args["train_indices"], args["validation_indices"], args["test_indices"] = self.__getIndices(len(list), args)
+
+        if self.type == "train":
+            indices = args["train_indices"]
+        elif self.type == "validation":
+            indices = args["validation_indices"]
+        if self.type == "test":
+            indices = args["test_indices"]
+        
+        return list, indices
+    
+    
+    def loadDataStage(self, list, indices):
+        args = self.config.dataset['args']
+
+        self.__data, self.__labels = self.__loadImages(list, args, indices)
+        if self.type == "train":
+            # train data augmentation
+            if args["augmentation"]:
+                self.__augmentTrainData(args["augmentation_args"])
+        
+        # create data generator
+        datagen = ImageDataGenerator(samplewise_center=False, samplewise_std_normalization=False)
+
+        # compile the data generators
+        if self.type == "train":
+            self.n_batches = self.__data.shape[0] // self.config.batchsize + 1
+            self.datagen = datagen.flow(x=self.__data, y=self.__labels,
+                                        batch_size=self.config.batchsize, shuffle=True)
+            
+            #training_dir = self.config.training_dir
+            #self.datagen = datagen.flow(x=self.__data, y=self.__labels,
+            #                            batch_size=self.config.batchsize, shuffle=True,
+            #                            save_to_dir=training_dir,
+            #                            save_prefix='train')
+        else:
+            self.n_batches = self.__data.shape[0]
+            self.datagen = datagen.flow(x=self.__data, y=self.__labels, batch_size=1, shuffle=False)
+        
+
     def __loadData(self, args):
 
         list = os.listdir(self.__binary_codes_path)
@@ -92,8 +138,10 @@ class ClassifierDataLoader(BaseClass):
         labels = []
 
         for i, ind in enumerate(self.__indices):
+            #print("i:", i, "indice:", ind)
             for j in range(M):
                 # load data
+                #print("file:", self.__data_paths[j] + "/" + list[ind-1])
                 image_x = skimage.io.imread(self.__data_paths[j] + "/" + list[ind-1]).astype(np.float64)
                 image_x = self.__centralCrop(image_x, targen_size=self.config.models['classifier']["target_size"])
                 data.append(self.normaliseDynamicRange(image_x, args))

@@ -4,7 +4,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import *
 import datetime
 
-from libs.to_public.BaseClass import BaseClass
+from libs.BaseClass import BaseClass
 from libs.Classifier import Classifier
 # ======================================================================================================================
 
@@ -35,7 +35,7 @@ class ClassificationModel(BaseClass):
         self.tensor_board.set_model(self.ClassifierModel)
 
 
-    def __initClassificationModel(self):
+    def __initClassificationModel(self, args):
 
         input  = Input(shape=(self.config["models"]["classifier"]["target_size"][0],
                               self.config["models"]["classifier"]["target_size"][1],
@@ -71,6 +71,7 @@ class ClassificationModel(BaseClass):
 
     def __createResDirs(self, args):
 
+        self.training_dir = self.makeDir(self.config.training_dir)
         self.checkpoint_dir = self.makeDir(self.config.checkpoint_dir + "/" + args.checkpoint_dir)
         self.results_dir = self.makeDir(self.config.results_dir + "/" + args.dir)
         self.tensor_board_dir = self.makeDir("./TensorBoard/" + args.dir + "/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))

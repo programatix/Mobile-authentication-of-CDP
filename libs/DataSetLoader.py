@@ -36,6 +36,8 @@ class DataSetLoader(BaseClass):
 
         self._printed = []
         self._binary  = []
+        
+        self._image_type = args.image_type if "image_type" in args else "rgb"
 
 
     def initDataSet(self):
@@ -103,15 +105,15 @@ class DataSetLoader(BaseClass):
         self._indices = inds if not isinstance(inds, str) else self._loadIndices(inds)
 
         N = len(self._indices)
-        printed = np.zeros((N, (*args["target_size"])))
-        binary  = np.zeros((N, (*args["template_target_size"])))
+        printed = np.zeros((N, *args["target_size"]))
+        binary  = np.zeros((N, *args["template_target_size"]))
 
         i = -1
         for ind in self._indices:
             self.file_names.append(self._code_name % ind)
             i += 1
             # load data
-            image_x = skimage.io.imread(self._printed_codes_path + "/" + self._code_name % ind).astype(np.float64)
+            image_x = skimage.io.imread(self._printed_codes_path + "/" + self._image_type + "/" + self._code_name % ind).astype(np.float64)
             if len(image_x.shape) < len(args["target_size"]):
                 image_x = image_x.reshape((image_x.shape[0], image_x.shape[1], 1))
             image_y = skimage.io.imread(self._binary_codes_path + "/" + self._code_name % ind).astype(np.float64)

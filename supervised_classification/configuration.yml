@@ -1,4 +1,5 @@
 checkpoint_dir: checkpoints
+training_dir: training
 results_dir: results
 
 batchsize: 128
@@ -17,7 +18,7 @@ models:
     loss: "binary_crossentropy"
 
 dataset:
-  dataset_name: PGC_5x5
+  dataset_name: IndigoMobile
   args:
     symbol_size: 5
     templates_path: ../data/binary/
@@ -36,7 +37,3 @@ dataset:
     train_ratio: 0.4 # 40%
     val_ratio: 0.1 # 10%
     test_ration: 0.5 # 50%
-
-
-
-

@@ -47,7 +47,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # ======================================================================================================================
 
-def train():
+def train_prepare():
     config = yaml_utils.Config(yaml.load(open(args.config_path), Loader=yaml.FullLoader))
 
     args.checkpoint_dir = "%s_supervised_classifier_n_%d" % (args.image_type, args.n_classes)
@@ -60,7 +60,8 @@ def train():
     log.info("Start Train Data loading.....")
     args.seed = 300
     DataGenTrain = ClassifierDataLoader(config, args, type="train", is_debug_mode=args.is_debug)
-    DataGenTrain.initDataSet()
+    #DataGenTrain.initDataSet()
+    list, indices = DataGenTrain.loadDataStageInit();
 
 
     # === model scheme visualisation ===============================================================================
@@ -71,16 +72,19 @@ def train():
     # === Training =================================================================================================
     for epoch in range(args.epochs):
         Loss = []
-        batches = 0
-        save_each = saveSpeed(epoch)        
-        for x_batch, labels in DataGenTrain.datagen:
-            loss = Classifier.train_on_batch(x_batch, labels)
-            Loss.append(loss)
-            batches += 1
-            if batches >= DataGenTrain.n_batches:
-                # we need to break the loop by hand because
-                # the generator loops indefinitely
-                break
+        save_each = saveSpeed(epoch)
+
+        for indice in indices:
+            inds = [indice]
+            DataGenTrain.loadDataStage(list, inds)
+
+            batches = 0
+            for x_batch, labels in DataGenTrain.datagen:
+                batches += 1
+                if batches >= DataGenTrain.n_batches:
+                    # we need to break the loop by hand because
+                    # the generator loops indefinitely
+                    break
 
         log.info(f"epoch : {epoch}, \t loss = {np.mean(np.asarray(Loss))}")
 
@@ -90,4 +94,4 @@ def train():
 
 # ======================================================================================================================
 if __name__ == "__main__":
-    train()
+    train_prepare()

@@ -1,3 +1,7 @@
+import tensorflow as tf
+import keras
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import *
 import datetime
 from libs.BaseClass import BaseClass
 from libs.UNet import *
@@ -32,7 +36,7 @@ class TemplateEstimatior(BaseClass):
 
         self.tensor_board.set_model(self.EstimationModel)
 
-    def __initUnetModel(self):
+    def __initUnetModel(self, args):
         input  = Input(shape=(self.config["dataset"]["args"]["target_size"][0],
                               self.config["dataset"]["args"]["target_size"][1],
                               self.config.models["unet"]["input_channels"]))
@@ -46,13 +50,15 @@ class TemplateEstimatior(BaseClass):
 
         self.EstimationModel.compile(loss=loss, optimizer=optimizer)
 
-    def __initUnetXUnetT(self):
+    def __initUnetXUnetT(self, args):
         input_x = Input(shape=(self.config["dataset"]["args"]["target_size"][0],
                                self.config["dataset"]["args"]["target_size"][1],
                                self.config.models["unet"]["input_channels"]))
 
         input_t = Input(shape=(self.config["dataset"]["args"]["target_size"][0],
                                self.config["dataset"]["args"]["target_size"][1], 1))
+                               
+        print("input_x:", input_x)
 
         # --- init Models -------
         self.UnetXModel = UNet(filters=self.config.models["unet"]["filters"],
@@ -81,7 +87,7 @@ class TemplateEstimatior(BaseClass):
                                      loss_weights=[self.config.models["unet"]["loss_weight"], self.config.models["UnetXUnetT"]["loss_weight"]],
                                      optimizer=optimizer)
 
-    def __initUnetDxUnetDt(self):
+    def __initUnetDxUnetDt(self, args):
         input_x = Input(shape=(self.config["dataset"]["args"]["target_size"][0],
                                self.config["dataset"]["args"]["target_size"][1],
                                self.config.models["unet"]["input_channels"]))
@@ -159,4 +165,3 @@ class TemplateEstimatior(BaseClass):
         self.results_dir = self.makeDir(self.config.results_dir + "/" + args.dir)
         self.tensor_board_dir = self.makeDir("./TensorBoard/" + args.dir + "/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
         self.makeDir(self.config.results_dir + "/" + args.dir + "/prediction/")
-

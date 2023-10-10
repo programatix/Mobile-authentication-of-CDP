@@ -5,6 +5,10 @@ Author: Olga TARAN, University of Geneva, 2021
 '''
 
 from __future__ import print_function
+
+import os
+os.chdir('./one_class_classification')
+
 import argparse
 import yaml
 
@@ -54,7 +58,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def run(args):
 
-    config = yaml_utils.Config(yaml.load(open(args.config_path)))
+    config = yaml_utils.Config(yaml.load(open(args.config_path), Loader=yaml.FullLoader))
     symbol_size = config.dataset["args"]["symbol_size"]
 
     args.checkpoint_dir = "%s_%s" % (args.image_type, args.type)
@@ -89,7 +93,7 @@ def run(args):
 
         Res = []
         l = -1
-         for x_batch, y_batch in DataGen.datagen:
+        for x_batch, y_batch in DataGen.datagen:
             l += 1
             if batches == l:
                 break
@@ -119,44 +123,3 @@ def run(args):
 # ======================================================================================================================
 if __name__ == "__main__":
     run(args)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

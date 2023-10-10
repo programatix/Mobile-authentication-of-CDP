@@ -54,6 +54,10 @@ class BaseUnet():
             # Upsampling by simply repeating rows and columns then convolve
             up = UpSampling2D(size=(2, 2))(x)
             up = Conv2D(filters, 2, **conv_kwargs)(up)
+            
+        dif = shortcut.get_shape()[1] - up.get_shape()[1]
+        if dif > 0:
+            up = ZeroPadding2D(padding=[(dif,0),(dif,0)])(up)
 
         # Concatenate u-net shortcut to input
         x = concatenate([shortcut, up], axis=3)
@@ -96,10 +100,9 @@ class UNet(BaseUnet):
         e3 = self.encoder_block(e2, self.filters[3], 3, downsample=True)
         e4 = self.encoder_block(e3, self.filters[4], 3, downsample=True)
         e4 = Dropout(0.5)(e4)
-
         e5 = self.encoder_block(e4, self.filters[5], 3, downsample=True)
         e5 = Dropout(0.5)(e5)
-
+        
         d6 = self.decoder_block([e5, e4], self.filters[4], 3, transpose=self.transpose)
         d7 = self.decoder_block([d6, e3], self.filters[3], 3, transpose=self.transpose)
         d8 = self.decoder_block([d7, e2], self.filters[2], 3, transpose=self.transpose)

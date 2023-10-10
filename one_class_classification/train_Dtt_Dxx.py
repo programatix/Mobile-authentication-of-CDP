@@ -5,14 +5,18 @@ Author: Olga TARAN, University of Geneva, 2021
 '''
 
 from __future__ import print_function
+
+import os
+os.chdir('./one_class_classification')
+
 import argparse
 import yaml
 
 import sys
 sys.path.insert(0,'..')
 
-import libs._yaml_utils as yaml_utils
-from libs._utils import *
+import libs.yaml_utils as yaml_utils
+from libs.utils import *
 
 from libs.DataSetLoader import DataSetLoader
 from libs.EstimatiorModel import TemplateEstimatior
@@ -27,7 +31,7 @@ parser.add_argument("--type", default="Dtt_Dxx", type=str, help="The trained mod
 parser.add_argument("--epochs", default=100, type=int, help="Number of training epochs")
 parser.add_argument("--start_epoch", default=0, type=int, help="The start epoch")
 # log mode
-parser.add_argument("--is_debug", default=True, type=int, help="Is debug mode?")
+parser.add_argument("--is_debug", default=False, type=int, help="Is debug mode?")
 
 args = parser.parse_args()
 # ======================================================================================================================
@@ -41,7 +45,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def train(args):
 
-    config = yaml_utils.Config(yaml.load(open(args.config_path)))
+    config = yaml_utils.Config(yaml.load(open(args.config_path), Loader=yaml.FullLoader))
 
     args.checkpoint_dir = "%s_%s" % (args.image_type, args.type)
     args.dir = "%s" % args.type
@@ -52,6 +56,7 @@ def train(args):
 
     # --- Data set -----------
     log.info("Start Train Data loading.....")
+    args.seed = 40
     DataGenTrain = DataSetLoader(config, args, type="train", is_debug_mode=args.is_debug)
     DataGenTrain.initDataSet()
 
@@ -73,7 +78,6 @@ def train(args):
         batches = 0
         save_each = saveSpeed(epoch)
         for x_batch, y_batch in DataGenTrain.datagen:
-
             y_batch = y_batch.reshape((-1, config["dataset"]["args"]["target_size"][0],
                                        config["dataset"]["args"]["target_size"][1], 1))
             # --- estimator -----
@@ -98,62 +102,3 @@ def train(args):
 # ======================================================================================================================
 if __name__ == "__main__":
     train(args)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
